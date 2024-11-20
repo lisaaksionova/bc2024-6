@@ -2,9 +2,12 @@ const {program} = require('commander');
 const express = require("express");
 const app = express();
 const fs = require('fs').promises; 
+const fsSync = require('fs')
 const path = require('path');
 const http = require('http');
 const multer = require("multer");
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yaml');
 
 program
   .requiredOption('-h, --host <address>', 'адреса сервера')
@@ -16,6 +19,13 @@ program.parse(process.argv);
 const options = program.opts();
 app.use(express.json());
 app.use(express.text());
+
+const file  = fsSync.readFileSync('./openapi.yaml', 'utf8')
+const swaggerDocument = YAML.parse(file)
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+
 
 app.get('/notes/:noteName', (req, res) => {
   const noteName = req.params.noteName;
@@ -143,7 +153,7 @@ app.post("/write", upload.none(), async (req, res) => {
 
 app.get('/UploadForm.html', (req, res) => {
   res.setHeader('Content-Type', 'text/html');
-  res.sendFile('D:\\uni-2course\\backend\\lab_5\\bc2024-5\\UploadForm.html');
+  res.sendFile('/usr/src/app/UploadForm.html');
 });
 
 
